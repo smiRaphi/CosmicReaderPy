@@ -23,8 +23,11 @@ def cos2mc(i:str,o:str,block_map:dict|str='default',take_xy=True):
     for x in range(csREGBL):
         for y in range(csREGBL):
             for z in range(csREGBL):
-                b = cs.get_block((x,y,z)).replace('[default]','')
-                assert b in bm,'unknown block: ' + b
+                try: b = cs.get_block((x,y,z)).replace('[default]','')
+                except: b = 'base:air'
+                if not b in bm:
+                    print('WARNING: unknown block:',b)
+                    b = 'base:debug'
                 mc.set_block(bm[b],x,y,z)
                 tq.update()
     mc.save(o)

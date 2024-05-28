@@ -51,9 +51,10 @@ class Region:
             self.chunkn = tf.readU32()
             chofs = [tf.readU32() for _ in range(self.chunkn)]
             for x in chofs:
+                if x == 0xffffffff: continue
                 tf.seek(x)
                 self.chunks.append(Chunk(tf.readSBYT('readU32')))
-            self.chunksxyz = [x.xyz for x in self.chunks]
+            self.chunksxyz = {x.xyz:x for x in self.chunks}
         else:
             self.version = 1
             self.compr = 0
@@ -62,7 +63,8 @@ class Region:
         if not relative: xyz = (xyz[0] - self.xyz[0]*REGL,xyz[1] - self.xyz[1]*REGL,xyz[2] - self.xyz[2]*REGL)
         assert xyz[0] < REGBL and xyz[1] < REGBL and xyz[2] < REGBL,"Coordinates out of bounds"
         cxyz = (xyz[0]//REGL,xyz[1]//REGL,xyz[2]//REGL)
-        return self.chunks[self.chunksxyz.index(cxyz)].get_block((xyz[2]%REGL,xyz[0]%REGL,xyz[1]%REGL))
+        assert cxyz in self.chunksxyz,f"Chunk {cxyz} isn't saved"
+        return self.chunksxyz[cxyz].get_block((xyz[2]%REGL,xyz[0]%REGL,xyz[1]%REGL))
 
 if __name__ == '__main__':
     from sys import argv
