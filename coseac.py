@@ -4,6 +4,9 @@ CHUNKL = 16
 REGL = 16
 REGBL = REGL * CHUNKL
 
+class CoordinatesOutOfBounds(Exception): pass
+class ChunkNotSaved(Exception): pass
+
 class Chunk:
     def __init__(self,data:bytes=None,xyz=(0,0,0)):
         self.d = File(data,endian='>')
@@ -25,13 +28,13 @@ class Chunk:
                     elif t == 6: self.layers.append([self.d.readU16() for _ in range(CHUNKL**2)])
                     else:
                         print('Chunk:',self.d.read())
-                        raise Exception(f'Layer type {t} not implemented')
+                        raise NotImplementedError(f'Layer type {t} not implemented')
         else:
             self.version = 1
             self.xyz = xyz
             self.pallet = []
     def get_block(self,xyz:tuple[int]) -> str:
-        assert xyz[0] < CHUNKL and xyz[1] < CHUNKL and xyz[2] < CHUNKL,"Coordinates out of bounds"
+        if not (xyz[0] < CHUNKL and xyz[1] < CHUNKL and xyz[2] < CHUNKL): raise CoordinatesOutOfBounds(str(xyz)[1:-1])
         if type(self.pallet) == str: return self.pallet
         try: l = self.layers[xyz[2]]
         except: return 'base:air[default]'
@@ -61,9 +64,9 @@ class Region:
             self.chunkn = 0
     def get_block(self,xyz:tuple[int],relative=False) -> str:
         if not relative: xyz = (xyz[0] - self.xyz[0]*REGL,xyz[1] - self.xyz[1]*REGL,xyz[2] - self.xyz[2]*REGL)
-        assert xyz[0] < REGBL and xyz[1] < REGBL and xyz[2] < REGBL,"Coordinates out of bounds"
+        if not (xyz[0] < REGBL and xyz[1] < REGBL and xyz[2] < REGBL): raise CoordinatesOutOfBounds(str(xyz)[1:-1])
         cxyz = (xyz[0]//REGL,xyz[1]//REGL,xyz[2]//REGL)
-        assert cxyz in self.chunksxyz,f"Chunk {cxyz} isn't saved"
+        if not cxyz in self.chunksxyz: raise ChunkNotSaved(str(cxyz)[1:-1])
         return self.chunksxyz[cxyz].get_block((xyz[2]%REGL,xyz[0]%REGL,xyz[1]%REGL))
 
 if __name__ == '__main__':

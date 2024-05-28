@@ -2,7 +2,7 @@ import json,os,anvil
 from tqdm import tqdm
 
 from anvil import Region as mcRegion,Block
-from coseac import Region as csRegion,REGBL as csREGBL
+from coseac import Region as csRegion,REGBL as csREGBL,ChunkNotSaved
 
 def load_bmap(i) -> dict:
     if type(i) == dict: return i
@@ -24,7 +24,7 @@ def cos2mc(i:str,o:str,block_map:dict|str='default',take_xy=True):
         for y in range(csREGBL):
             for z in range(csREGBL):
                 try: b = cs.get_block((x,y,z)).replace('[default]','')
-                except: b = 'base:air'
+                except ChunkNotSaved: b = 'base:air'
                 if not b in bm:
                     print('WARNING: unknown block:',b)
                     b = 'base:debug'
