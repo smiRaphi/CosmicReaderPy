@@ -22,7 +22,7 @@
     "base:water":"minecraft:water",
     "base:debug":"minecraft:barrier",
     "base:metal_panel":"minecraft:iron_block",
-    "base:wood_planks":"oak_planks",
+    "base:wood_planks":"minecraft:oak_planks",
     "base:dirt":"minecraft:dirt",
     "base:sand":"minecraft:sand"
 }
